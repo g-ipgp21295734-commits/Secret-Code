@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Secret Code Adventure</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: linear-gradient(to bottom, #56ab2f, #a8e063);
+    color: #fff;
+    overflow: hidden;
+}
+
+h1 {
+    text-shadow: 2px 2px #000;
+}
+
+.card {
+    background: white;
+    color: black;
+    padding: 20px;
+    border-radius: 15px;
+    width: 60%;
+    margin: auto;
+}
+
+input {
+    padding: 10px;
+    width: 60%;
+}
+
+button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    background: orange;
+    border: none;
+    border-radius: 10px;
+}
+
+.treasure-box {
+    font-size: 100px;
+    margin-top: 30px;
+    cursor: pointer;
+    animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
+
+.hidden { display: none; }
+
+.feedback img {
+    width: 80px;
+    margin-top: 10px;
+}
+
+/* 🎉 BIG CELEBRATION */
+#celebration {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: radial-gradient(circle, #ffcc00, #ff6600, #000);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    color:white;
+    font-size:40px;
+    z-index:999;
+}
+
+.gold {
+    font-size: 60px;
+    animation: bounce 0.8s infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-20px); }
+}
+
+/* confetti */
+.confetti {
+    position:absolute;
+    font-size:30px;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-100px); }
+    100% { transform: translateY(800px); }
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>🌴 SECRET CODE ADVENTURE 🥕</h1>
+
+<div class="card" id="gameCard">
+    <h3 id="question"></h3>
+    <input type="text" id="answer">
+    <br>
+    <button onclick="submitAnswer()">Submit</button>
+    <div id="feedback"></div>
+</div>
+
+<h3 id="progress"></h3>
+
+<div class="treasure-box hidden" id="chest" onclick="openChest()">
+    🧰
+</div>
+
+<!-- 🎉 CELEBRATION -->
+<div id="celebration">
+    <div>🎉 CONGRATULATIONS!!! 🎉</div>
+    <div class="gold">💰💎🪙💰💎🪙</div>
+    <p>YOU UNLOCKED THE TREASURE!</p>
+    <p>🏆 HEALTHY FOOD CHAMPION 🏆</p>
+</div>
+
+<!-- AUDIO -->
+<audio id="bgMusic" loop>
+<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9bce0b.mp3">
+</audio>
+
+<audio id="correctSound">
+<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3">
+</audio>
+
+<audio id="clapSound">
+<source src="https://cdn.pixabay.com/audio/2022/03/10/audio_270c2c78d1.mp3">
+</audio>
+
+<audio id="wrongSound">
+<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_1719a0b9a8.mp3">
+</audio>
+
+<script>
+
+const questions = [
+{q:"Crunchy orange root vegetable that helps eyesight?", a:"carrot"},
+{q:"Leafy green, low-calorie salad base?", a:"lettuce"},
+{q:"Soft sweet fruit with fuzzy skin?", a:"peach"},
+{q:"Starchy vegetable for energy?", a:"potato"},
+{q:"Small green balls in pods, high protein?", a:"peas"},
+{q:"Green tree-like vegetable full of vitamins?", a:"broccoli"},
+{q:"Red fruit often mistaken as vegetable?", a:"tomato"},
+{q:"Spiky tropical fruit, helps digestion?", a:"pineapple"},
+{q:"Vitamin C citrus fruit?", a:"orange"},
+{q:"Hard shell fruit with water inside?", a:"coconut"}
+];
+
+let current = 0;
+let musicStarted = false;
+
+/* START GAME */
+window.onload = () => {
+    loadQuestion();
+};
+
+/* start music AFTER first click */
+document.addEventListener("click", () => {
+    if (!musicStarted) {
+        document.getElementById("bgMusic").play();
+        musicStarted = true;
+    }
+});
+
+/* load question */
+function loadQuestion() {
+    document.getElementById("question").innerText = questions[current].q;
+    document.getElementById("progress").innerText =
+        "Question " + (current + 1) + " / 10";
+}
+
+/* answer check */
+function submitAnswer() {
+    let input = document.getElementById("answer").value.toLowerCase();
+    let feedback = document.getElementById("feedback");
+
+    if(input === questions[current].a) {
+
+        document.getElementById("correctSound").play();
+        document.getElementById("clapSound").play();
+
+        feedback.innerHTML = "✅ CORRECT! 🎉<br><img src='https://cdn-icons-png.flaticon.com/512/190/190411.png'>";
+
+        current++;
+
+        setTimeout(() => {
+            if(current < questions.length) {
+                loadQuestion();
+                feedback.innerHTML = "";
+            } else {
+                document.getElementById("gameCard").classList.add("hidden");
+                document.getElementById("chest").classList.remove("hidden");
+                document.getElementById("progress").innerText = "🎯 Click the treasure!";
+            }
+        }, 1000);
+
+    } else {
+        document.getElementById("wrongSound").play();
+
+        feedback.innerHTML = "❌ Incorrect! Don't give up 💪<br><img src='https://cdn-icons-png.flaticon.com/512/564/564619.png'>";
+    }
+
+    document.getElementById("answer").value = "";
+}
+
+/* open chest + MASSIVE celebration */
+function openChest() {
+
+    document.getElementById("chest").innerText = "✨";
+
+    // generate confetti
+    for(let i=0;i<30;i++){
+        let conf = document.createElement("div");
+        conf.className = "confetti";
+        conf.innerText = ["💰","💎","🪙"][Math.floor(Math.random()*3)];
+        conf.style.left = Math.random()*100 + "vw";
+        conf.style.animationDuration = (Math.random()*2+2)+"s";
+        document.body.appendChild(conf);
+    }
+
+    setTimeout(() => {
+        document.getElementById("celebration").style.display = "flex";
+    }, 800);
+}
+
+</script>
+
+</body>
+</html>
